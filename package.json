@@ -1,0 +1,24 @@
+{
+  "name": "reddit-auto-show-all-comments",
+  "version": "1.0.0",
+  "author": "alythobani",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/chrome": "^0.0.297",
+    "@types/node": "^22.10.7",
+    "@types/webpack": "^5.28.5",
+    "copy-webpack-plugin": "^12.0.2",
+    "eslint": "^9.18.0",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  }
+}
