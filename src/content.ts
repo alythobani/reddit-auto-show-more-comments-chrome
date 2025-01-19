@@ -1,3 +1,5 @@
+import { logMessage } from "./logger";
+
 const INTERVAL_MS = 3000;
 const MAX_NUM_CHECKS = 5;
 
@@ -42,8 +44,7 @@ function clickViewMoreComments(intervalState: IntervalState): void {
       if (!buttonSpan.innerText.includes("View more comments")) {
         return;
       }
-      console.log("Clicking 'View more comments' button");
-      buttonSpan.closest("button")?.click();
+      clickButtonSpan(buttonSpan);
     });
 }
 
@@ -57,11 +58,13 @@ function clickMoreRepliesButtons(intervalState: IntervalState): void {
       if (!buttonSpan.innerText.includes("more replies")) {
         return;
       }
-      const button = buttonSpan.closest("button");
-      if (!button) return;
-      console.log(`Clicking '${button.innerText.trim()}' button`);
-      button.click();
+      clickButtonSpan(buttonSpan);
     });
+}
+
+function clickButtonSpan(buttonSpan: HTMLSpanElement): void {
+  logMessage(`Clicking '${buttonSpan.innerText.trim()}' button`);
+  buttonSpan.click();
 }
 
 function maybeStopInterval(intervalState: IntervalState): boolean {
