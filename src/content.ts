@@ -1,8 +1,5 @@
 import { logMessage } from "./logger";
 
-const INTERVAL_MS = 3000;
-const MAX_NUM_CHECKS = 5;
-
 const BUTTON_NAMES_TO_CLICK = [
   "View more comments",
   "more replies",
@@ -10,14 +7,22 @@ const BUTTON_NAMES_TO_CLICK = [
 ];
 
 function main(): void {
-  clickAllButtons();
+  logMessage("Initializing button clicker...");
+  observeDOMChanges();
 }
 
-function clickAllButtons(numChecksSoFar = 0): void {
-  if (numChecksSoFar >= MAX_NUM_CHECKS) {
-    return;
-  }
-  logMessage("Finding buttons to click");
+function observeDOMChanges(): void {
+  const observer = new MutationObserver(() => {
+    logMessage("DOM updated, searching for buttons to click...");
+    clickAllButtons();
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  clickAllButtons(); // Initial check on page load
+}
+
+function clickAllButtons(): void {
   document
     .querySelectorAll<HTMLSpanElement>("button span")
     .forEach((buttonSpan) => {
@@ -26,7 +31,6 @@ function clickAllButtons(numChecksSoFar = 0): void {
       }
       clickButtonSpan(buttonSpan);
     });
-  setTimeout(() => clickAllButtons(numChecksSoFar + 1), INTERVAL_MS);
 }
 
 function isButtonToClick(buttonSpan: HTMLSpanElement): boolean {
