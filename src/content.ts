@@ -7,32 +7,17 @@ const BUTTON_NAMES_TO_CLICK = [
 ];
 
 function main(): void {
+  clickAllButtons(); // Initial check on page load
   observeDOMChanges();
 }
 
 function observeDOMChanges(): void {
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (!(node instanceof HTMLElement)) {
-          return;
-        }
-        clickAllButtonsInElement(node);
-      });
-    });
-  });
-
+  const observer = new MutationObserver(clickAllButtons);
   observer.observe(document.body, { childList: true, subtree: true });
-
-  clickAllButtonsInElement(document.body); // Initial check on page load
 }
 
-function clickAllButtonsInElement(element: HTMLElement): void {
-  if (element instanceof HTMLButtonElement) {
-    maybeClickButton(element);
-    return;
-  }
-  element.querySelectorAll("button").forEach(maybeClickButton);
+function clickAllButtons(): void {
+  document.body.querySelectorAll("button").forEach(maybeClickButton);
 }
 
 function maybeClickButton(button: HTMLButtonElement): void {
