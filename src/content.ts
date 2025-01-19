@@ -24,11 +24,18 @@ function maybeClickButton(button: HTMLButtonElement): void {
   if (!isButtonToClick(button)) {
     return;
   }
+  if (!isButtonVisible(button)) {
+    return;
+  }
   clickButton(button);
 }
 
 function isButtonToClick(button: HTMLButtonElement): boolean {
   return BUTTON_NAMES_TO_CLICK.some((name) => button.innerText.includes(name));
+}
+
+function isButtonVisible(button: HTMLButtonElement): boolean {
+  return button.offsetParent !== null;
 }
 
 function clickButton(button: HTMLButtonElement): void {
