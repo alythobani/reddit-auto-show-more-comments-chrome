@@ -17,22 +17,22 @@ function observeDOMChanges(): void {
         if (!(node instanceof HTMLElement)) {
           return;
         }
-        clickAllButtonsInNode(node);
+        clickAllButtonsInElement(node);
       });
     });
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
 
-  clickAllButtonsInNode(document.body); // Initial check on page load
+  clickAllButtonsInElement(document.body); // Initial check on page load
 }
 
-function clickAllButtonsInNode(node: HTMLElement): void {
-  if (node instanceof HTMLButtonElement) {
-    maybeClickButton(node);
+function clickAllButtonsInElement(element: HTMLElement): void {
+  if (element instanceof HTMLButtonElement) {
+    maybeClickButton(element);
     return;
   }
-  node.querySelectorAll("button").forEach(maybeClickButton);
+  element.querySelectorAll("button").forEach(maybeClickButton);
 }
 
 function maybeClickButton(button: HTMLButtonElement): void {
