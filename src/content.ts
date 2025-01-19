@@ -12,7 +12,6 @@ type State = {
 };
 
 function main(): void {
-  console.log("Content script running!");
   const state = initializeState();
   clickViewMoreComments(state.viewMoreCommentsIntervalState);
   clickMoreRepliesButtons(state.moreRepliesIntervalState);
@@ -69,9 +68,7 @@ function maybeStopInterval(intervalState: IntervalState): boolean {
   if (intervalState.numChecks < MAX_NUM_CHECKS) {
     return false;
   }
-  console.log("Reached maximum number of checks. Stopping.");
   if (intervalState.id === null) {
-    console.log("Interval already cleared. Returning.");
     return true;
   }
   clearInterval(intervalState.id);
