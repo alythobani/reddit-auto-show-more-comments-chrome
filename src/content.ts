@@ -7,41 +7,48 @@ const BUTTON_NAMES_TO_CLICK = [
 ];
 
 function main(): void {
-  logMessage("Initializing button clicker...");
   observeDOMChanges();
 }
 
 function observeDOMChanges(): void {
-  const observer = new MutationObserver(() => {
-    logMessage("DOM updated, searching for buttons to click...");
-    clickAllButtons();
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (!(node instanceof HTMLElement)) {
+          return;
+        }
+        clickAllButtonsInNode(node);
+      });
+    });
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
 
-  clickAllButtons(); // Initial check on page load
+  clickAllButtonsInNode(document.body); // Initial check on page load
 }
 
-function clickAllButtons(): void {
-  document
-    .querySelectorAll<HTMLSpanElement>("button span")
-    .forEach((buttonSpan) => {
-      if (!isButtonToClick(buttonSpan)) {
-        return;
-      }
-      clickButtonSpan(buttonSpan);
-    });
+function clickAllButtonsInNode(node: HTMLElement): void {
+  if (node instanceof HTMLButtonElement) {
+    maybeClickButton(node);
+    return;
+  }
+  node.querySelectorAll("button").forEach(maybeClickButton);
 }
 
-function isButtonToClick(buttonSpan: HTMLSpanElement): boolean {
-  return BUTTON_NAMES_TO_CLICK.some((name) =>
-    buttonSpan.innerText.includes(name)
-  );
+function maybeClickButton(button: HTMLButtonElement): void {
+  if (!isButtonToClick(button)) {
+    return;
+  }
+  clickButton(button);
 }
 
-function clickButtonSpan(buttonSpan: HTMLSpanElement): void {
-  logMessage(`Clicking '${buttonSpan.innerText.trim()}' button`);
-  buttonSpan.click();
+function isButtonToClick(button: HTMLButtonElement): boolean {
+  return BUTTON_NAMES_TO_CLICK.some((name) => button.innerText.includes(name));
+}
+
+function clickButton(button: HTMLButtonElement): void {
+  logMessage(`Clicking '${button.innerText.trim()}' button`);
+  button.click();
 }
 
 main();
