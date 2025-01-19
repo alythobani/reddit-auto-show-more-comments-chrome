@@ -30,7 +30,10 @@ const config: webpack.Configuration = {
   },
   plugins: [
     new CopyWebpackPlugin({
-      patterns: [{ from: "src/manifest.json" }],
+      patterns: [
+        { from: "src/manifest.json" },
+        { from: "assets", to: "assets" },
+      ],
     }),
   ],
 };
