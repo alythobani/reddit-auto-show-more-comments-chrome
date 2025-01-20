@@ -9,6 +9,6 @@ A simple Chrome extension that automatically shows more Reddit comments by defau
 
 ## Feedback
 
-I probably can't dedicate much time to this project, nor guarantee a response, but feel free to [open an issue](https://github.com/alythobani/reddit-auto-show-all-comments-chrome-extension/issues) for any bug reports or feature requests. Also feel free to submit a pull request or fork the project.
+I probably can't dedicate much time to this project, nor guarantee a response, but feel free to [open an issue](https://github.com/alythobani/reddit-auto-show-all-comments-chrome-extension/issues) for any bug reports or suggestions. Also feel free to submit a pull request or fork the project.
 
 Have a great day and try to make someone else's day great too :)
