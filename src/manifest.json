@@ -3,7 +3,7 @@
   "name": "Reddit Auto Show All Comments",
   "description": "Automatically clicks 'X more replies' and 'View more comments' buttons on Reddit.",
   "version": "1.0.0",
-  "permissions": ["activeTab"],
+  "permissions": [],
   "background": {
     "service_worker": "background.js"
   },
