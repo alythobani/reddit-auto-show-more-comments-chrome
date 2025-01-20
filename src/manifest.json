@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Reddit Auto Show All Comments",
+  "name": "Reddit Auto Show More Comments",
   "description": "Automatically clicks 'X more replies' and 'View more comments' buttons on Reddit.",
   "version": "1.0.0",
   "permissions": [],
