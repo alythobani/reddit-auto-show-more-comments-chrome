@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Reddit Auto Show More Comments",
-  "description": "Automatically clicks 'X more replies' and 'View more comments' buttons on Reddit.",
+  "description": "Automatically expands and reveals default-collapsed and hidden Reddit comments for you.",
   "version": "1.0.0",
   "permissions": [],
   "background": {
