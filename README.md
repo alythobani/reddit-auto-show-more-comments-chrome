@@ -1,11 +1,12 @@
 # Reddit Auto Show More Comments
 
-A simple [Chrome extension](https://chromewebstore.google.com/detail/reddit-auto-show-more-com/bhampaflpobmpgmaoccpdbdkeaoacoai) that automatically shows more Reddit comments by default, without needing to manually click the numerous "(+) X more replies" and "View more comments" buttons scattered throughout threads. Also auto-expands threads that have been collapsed by default, when possible.
+A simple [Chrome extension](https://chromewebstore.google.com/detail/reddit-auto-show-more-com/bhampaflpobmpgmaoccpdbdkeaoacoai) that automatically clicks buttons to reveal hidden Reddit comments for you, removing the need to manually click the numerous "(+) X more replies" and "View more comments" buttons scattered throughout threads.
 
 ## Features
 
-- Automatically clicks all "(+) X more replies" and "View more comments" buttons
-- Auto-expands threads that have been collapsed by default, when possible
+- Auto-clicks "(+) X more replies" and "View more comments" buttons
+- Auto-expands threads that have been collapsed by default by Reddit, when possible
+- Progressively clicks buttons as you scroll (instead of all at once), to avoid Reddit rate limiting and browser lag on large threads
 
 ## Limitations
 
