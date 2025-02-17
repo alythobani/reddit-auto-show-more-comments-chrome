@@ -1,114 +1,159 @@
+import {
+  clickButton,
+  isButtonVisibleOrAlmostVisibleInViewport,
+  runActionOnAllButtonsInDocument,
+  runActionOnAllButtonsInDocumentAndShadowRoots,
+} from "./buttonUtils";
 import { logMessage } from "./logger";
 
-const BUTTON_NAMES_TO_CLICK = [
+const VIEW_MORE_COMMENTS_BUTTON_NAMES = [
   "View more comments",
   "more replies",
   "1 more reply",
 ];
 
-const EXPAND_THREAD_INTERVAL_MS = 2000;
-const VIEW_MORE_COMMENTS_INTERVAL_MS = 2000;
+const EXPAND_THREAD_BUTTON_BATCH_SIZE = 5;
+const EXPAND_THREAD_INTERVAL_MS = 1000;
+let isProcessingExpandThreadButtons = false;
 
-const MAX_NUM_EXPAND_THREAD_RUNS = 4;
-const MAX_NUM_VIEW_MORE_COMMENTS_RUNS = 3;
+const VIEW_MORE_COMMENTS_BUTTON_BATCH_SIZE = 5;
+const VIEW_MORE_COMMENTS_INTERVAL_MS = 1000;
+let isProcessingViewMoreCommentsButtons = false;
+
+const expandThreadButtonsSet = new Set<HTMLButtonElement>();
+
+const viewMoreCommentsButtonsSet = new Set<HTMLButtonElement>();
 
 function main(): void {
-  clickAllExpandThreadButtons(0); // Initial run
-  clickAllViewMoreCommentsButtons(0); // Initial run
+  collectExpandThreadButtons();
+  processExpandThreadButtons();
+  collectAndProcessViewMoreCommentsButtons();
   observeDOMChangesToViewMoreComments();
 }
 
-function getAllShadowRoots(): ShadowRoot[] {
-  const shadowRoots: ShadowRoot[] = [];
-  document.querySelectorAll("*").forEach((element) => {
-    if (element.shadowRoot !== null) {
-      shadowRoots.push(element.shadowRoot);
-    }
-  });
-  return shadowRoots;
+function collectExpandThreadButtons(): void {
+  runActionOnAllButtonsInDocumentAndShadowRoots(maybeCollectExpandThreadButton);
 }
 
-function clickAllExpandThreadButtons(numRuns: number): void {
-  if (numRuns >= MAX_NUM_EXPAND_THREAD_RUNS) {
-    return;
-  }
-  runActionOnAllButtonsInDocument(maybeClickExpandThreadButton);
-  setTimeout(
-    () => clickAllExpandThreadButtons(numRuns + 1),
-    EXPAND_THREAD_INTERVAL_MS
-  );
-}
-
-function runActionOnAllButtonsInDocument(
-  buttonAction: (button: HTMLButtonElement) => void
-): void {
-  const shadowRoots = getAllShadowRoots();
-  document.querySelectorAll<HTMLButtonElement>("button").forEach(buttonAction);
-  shadowRoots.forEach((shadowRoot) => {
-    shadowRoot
-      .querySelectorAll<HTMLButtonElement>("button")
-      .forEach(buttonAction);
-  });
-}
-
-function maybeClickExpandThreadButton(button: HTMLButtonElement): void {
+function maybeCollectExpandThreadButton(button: HTMLButtonElement): void {
   if (!isExpandThreadButton(button)) {
     return;
   }
-  if (!isButtonVisible(button)) {
-    return;
-  }
-  clickButton(button, "Expand thread");
+  expandThreadButtonsSet.add(button);
 }
 
 function isExpandThreadButton(button: HTMLButtonElement): boolean {
   return (
-    button.querySelector("svg")?.getAttribute("icon-name") === "join-outline"
+    button.querySelector("svg")?.getAttribute("icon-name") === "join-outline" &&
+    button.innerText.trim() === ""
   );
 }
 
 function observeDOMChangesToViewMoreComments(): void {
-  const observer = new MutationObserver(() =>
-    clickAllViewMoreCommentsButtons(0)
-  );
+  const observer = new MutationObserver((mutations) => {
+    collectAndProcessViewMoreCommentsButtons();
+    collectAndProcessNewExpandThreadButtons(mutations);
+  });
   observer.observe(document.body, { childList: true, subtree: true });
 }
 
-function clickAllViewMoreCommentsButtons(numRuns: number): void {
-  if (numRuns >= MAX_NUM_VIEW_MORE_COMMENTS_RUNS) {
+function collectAndProcessViewMoreCommentsButtons(): void {
+  collectViewMoreCommentsButtons();
+  if (!isProcessingViewMoreCommentsButtons) processViewMoreCommentsButtons();
+}
+
+function collectViewMoreCommentsButtons(): void {
+  runActionOnAllButtonsInDocument(maybeCollectViewMoreCommentsButton);
+}
+
+function maybeCollectViewMoreCommentsButton(button: HTMLButtonElement): void {
+  if (!isViewMoreCommentsButton(button)) {
     return;
   }
-  document.body.querySelectorAll("button").forEach(maybeClickButton);
-  setTimeout(
-    () => clickAllViewMoreCommentsButtons(numRuns + 1),
-    VIEW_MORE_COMMENTS_INTERVAL_MS
+  viewMoreCommentsButtonsSet.add(button);
+}
+
+function processViewMoreCommentsButtons(): void {
+  isProcessingViewMoreCommentsButtons = true;
+  if (viewMoreCommentsButtonsSet.size === 0) {
+    isProcessingViewMoreCommentsButtons = false;
+    return;
+  }
+  let numButtonsClicked = 0;
+  for (const button of viewMoreCommentsButtonsSet) {
+    if (!isButtonVisibleOrAlmostVisibleInViewport(button)) {
+      continue;
+    }
+    clickButton(button, true);
+    viewMoreCommentsButtonsSet.delete(button);
+    if (++numButtonsClicked >= VIEW_MORE_COMMENTS_BUTTON_BATCH_SIZE) {
+      break;
+    }
+  }
+  setTimeout(processViewMoreCommentsButtons, VIEW_MORE_COMMENTS_INTERVAL_MS);
+}
+
+function isViewMoreCommentsButton(button: HTMLButtonElement): boolean {
+  return VIEW_MORE_COMMENTS_BUTTON_NAMES.some((name) =>
+    button.innerText.includes(name)
   );
 }
 
-function maybeClickButton(button: HTMLButtonElement): void {
-  if (!isButtonToClick(button)) {
-    return;
-  }
-  if (!isButtonVisible(button)) {
-    return;
-  }
-  clickButton(button);
-}
-
-function isButtonToClick(button: HTMLButtonElement): boolean {
-  return BUTTON_NAMES_TO_CLICK.some((name) => button.innerText.includes(name));
-}
-
-function isButtonVisible(button: HTMLButtonElement): boolean {
-  return button.offsetParent !== null;
-}
-
-function clickButton(
-  button: HTMLButtonElement,
-  buttonName = button.innerText.trim()
+function collectAndProcessNewExpandThreadButtons(
+  mutations: MutationRecord[]
 ): void {
-  logMessage(`Clicking '${buttonName}' button`);
-  button.click();
+  const numNewExpandThreadButtonsFound =
+    collectNewExpandThreadButtons(mutations);
+  if (numNewExpandThreadButtonsFound > 0) {
+    logMessage(
+      `Found ${numNewExpandThreadButtonsFound} new 'Expand thread' buttons`
+    );
+    if (!isProcessingExpandThreadButtons) processExpandThreadButtons();
+  }
+}
+
+function collectNewExpandThreadButtons(mutations: MutationRecord[]): number {
+  let numNewExpandThreadButtonsFound = 0;
+  mutations.forEach((mutation) => {
+    mutation.addedNodes.forEach((newNode) => {
+      if (!(newNode instanceof HTMLElement)) {
+        return;
+      }
+      newNode
+        .querySelectorAll<HTMLButtonElement>("button")
+        .forEach((button) => {
+          if (!isExpandThreadButton(button)) {
+            return;
+          }
+          expandThreadButtonsSet.add(button);
+          numNewExpandThreadButtonsFound++;
+        });
+    });
+  });
+  return numNewExpandThreadButtonsFound;
+}
+
+function processExpandThreadButtons(): void {
+  isProcessingExpandThreadButtons = true;
+  if (expandThreadButtonsSet.size === 0) {
+    isProcessingExpandThreadButtons = false;
+    return;
+  }
+  let numButtonsClicked = 0;
+  for (const button of expandThreadButtonsSet) {
+    if (!isButtonVisibleOrAlmostVisibleInViewport(button)) {
+      continue;
+    }
+    clickButton(button, false);
+    expandThreadButtonsSet.delete(button);
+    if (++numButtonsClicked >= EXPAND_THREAD_BUTTON_BATCH_SIZE) {
+      break;
+    }
+  }
+  if (numButtonsClicked > 0) {
+    logMessage(`Clicked ${numButtonsClicked} 'Expand thread' buttons`);
+  }
+  setTimeout(processExpandThreadButtons, EXPAND_THREAD_INTERVAL_MS);
 }
 
 main();
